@@ -30,11 +30,11 @@ app.use((req, res, next) => {
 });
 
 // Serve static files from the React app
-const buildPath = path.join(__dirname, 'frontend', 'build');
+const buildPath = path.join(__dirname, 'build');
 console.log('Attempting to serve static files from:', buildPath);
 
 if (fs.existsSync(buildPath)) {
-  console.log('Build directory exists');
+  console.log('Build directory exists, contents:', fs.readdirSync(buildPath));
   app.use(express.static(buildPath));
 } else {
   console.log('Build directory does not exist at:', buildPath);
@@ -385,6 +385,9 @@ NODE_ENV: ${process.env.NODE_ENV}
 PORT: ${process.env.PORT}
 PWD: ${process.env.PWD}
           </pre>
+
+          <h3>Build Directory Contents (if exists):</h3>
+          <pre class="code">${fs.existsSync(buildPath) ? JSON.stringify(fs.readdirSync(buildPath), null, 2) : 'Build directory does not exist'}</pre>
         </body>
       </html>
     `);
