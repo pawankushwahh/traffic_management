@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "cd frontend && npm install --legacy-peer-deps && npm run build && cd .. && npm install",
+    "build": "cd frontend && npm install --legacy-peer-deps && npm run build && cd .. && npm install && node -e \"const fs=require('fs');const path=require('path');const dir=path.join(__dirname,'frontend','build');console.log('Build directory contents:',fs.readdirSync(dir));\"",
     "dev": "nodemon server.js"
   },
   "dependencies": {

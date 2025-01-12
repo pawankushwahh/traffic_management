@@ -23,18 +23,28 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 
-// Serve static files from the React app
-const buildPath = path.resolve(__dirname, './frontend/build');
-const publicPath = path.resolve(__dirname, './frontend/public');
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
-console.log('Checking paths:');
-console.log('Build path:', buildPath);
-console.log('Public path:', publicPath);
+// Serve static files from the React app
+const buildPath = path.join(__dirname, 'frontend', 'build');
+console.log('Attempting to serve static files from:', buildPath);
+
+if (fs.existsSync(buildPath)) {
+  console.log('Build directory exists');
+  app.use(express.static(buildPath));
+} else {
+  console.log('Build directory does not exist at:', buildPath);
+  console.log('Current directory contents:', fs.readdirSync(__dirname));
+}
 
 // Serve manifest.json with correct content type
 app.get('/manifest.json', (req, res) => {
   const manifestPath = path.join(buildPath, 'manifest.json');
-  const publicManifestPath = path.join(publicPath, 'manifest.json');
+  const publicManifestPath = path.join(__dirname, 'frontend', 'public', 'manifest.json');
   
   if (fs.existsSync(manifestPath)) {
     res.set('Content-Type', 'application/json');
@@ -62,23 +72,6 @@ app.get('/manifest.json', (req, res) => {
     });
   }
 });
-
-// Serve static files from build directory first, then public
-app.use(express.static(buildPath, {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.json')) {
-      res.set('Content-Type', 'application/json');
-    }
-  }
-}));
-
-app.use(express.static(publicPath, {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.json')) {
-      res.set('Content-Type', 'application/json');
-    }
-  }
-}));
 
 // Configure multer for file uploads with no size limit
 const storage = multer.diskStorage({
@@ -354,40 +347,44 @@ app.get('/api/signal-status', (req, res) => {
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
 app.get('*', (req, res) => {
-  const indexPath = path.join(buildPath, 'index.html');
-  const publicIndexPath = path.join(publicPath, 'index.html');
+  console.log('Catch-all route hit for:', req.path);
   
-  console.log('Request path:', req.path);
-  console.log('Checking index at:', indexPath);
-  console.log('Checking public index at:', publicIndexPath);
-
+  const indexPath = path.join(buildPath, 'index.html');
+  console.log('Looking for index.html at:', indexPath);
+  
   if (fs.existsSync(indexPath)) {
+    console.log('Found index.html, sending file');
     res.sendFile(indexPath);
-  } else if (fs.existsSync(publicIndexPath)) {
-    res.sendFile(publicIndexPath);
   } else {
-    console.error('No index.html found in either build or public directory');
+    console.log('index.html not found');
     res.status(404).send(`
       <html>
         <head>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
+            body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
             .error { color: red; }
-            .path { font-family: monospace; background: #f0f0f0; padding: 5px; }
+            .code { background: #f0f0f0; padding: 10px; border-radius: 4px; }
           </style>
         </head>
         <body>
-          <h1 class="error">Frontend Files Not Found</h1>
-          <p>The frontend files could not be located. Here's what we checked:</p>
-          <ul>
-            <li>Build directory: <span class="path">${buildPath}</span></li>
-            <li>Public directory: <span class="path">${publicPath}</span></li>
-            <li>Build index: <span class="path">${indexPath}</span></li>
-            <li>Public index: <span class="path">${publicIndexPath}</span></li>
-          </ul>
-          <p>Current working directory: <span class="path">${process.cwd()}</span></p>
-          <p>Directory contents:</p>
-          <pre>${fs.existsSync(__dirname) ? fs.readdirSync(__dirname).join('\n') : 'Directory not accessible'}</pre>
+          <h1 class="error">Application Error</h1>
+          <p>The application could not be loaded. Here's some debug information:</p>
+          
+          <h3>Current Directory Structure:</h3>
+          <pre class="code">${JSON.stringify(fs.readdirSync(__dirname), null, 2)}</pre>
+          
+          <h3>Build Path:</h3>
+          <p class="code">${buildPath}</p>
+          
+          <h3>Index Path:</h3>
+          <p class="code">${indexPath}</p>
+          
+          <h3>Environment:</h3>
+          <pre class="code">
+NODE_ENV: ${process.env.NODE_ENV}
+PORT: ${process.env.PORT}
+PWD: ${process.env.PWD}
+          </pre>
         </body>
       </html>
     `);
@@ -432,20 +429,15 @@ const sequelize = new Sequelize(process.env.DATABASE_URL || 'postgres://user:pas
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
-
-// Add error handling for server startup
-server.listen(PORT, async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('Database connection established');
-  } catch (error) {
-    console.error('Unable to connect to database:', error);
-  }
-  console.log(`Server running on port ${PORT}`);
+const port = process.env.PORT || 5000;
+server.listen(port, () => {
+  console.log('Server running on port', port);
+  console.log('Current directory:', __dirname);
+  console.log('Build path:', buildPath);
+  console.log('Directory contents:', fs.readdirSync(__dirname));
 }).on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Please try a different port or kill the process using this port.`);
+    console.error(`Port ${port} is already in use. Please try a different port or kill the process using this port.`);
   } else {
     console.error('Error starting server:', error);
   }
