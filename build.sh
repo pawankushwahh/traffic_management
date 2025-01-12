@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# exit on error
+set -o errexit
 
 echo "Starting build process..."
 
@@ -29,8 +31,14 @@ fi
 echo "Frontend build completed successfully!"
 
 # Return to root
+echo "Moving back to root..."
 cd ..
 
 # Run verification
-echo "Running build verification..."
-node verify-build.js
+echo "Running build copy script..."
+node copy-build.js
+
+echo "Verifying build..."
+node verify-frontend.js
+
+echo "Build process complete!"
