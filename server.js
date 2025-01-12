@@ -323,12 +323,11 @@ io.on('connection', (socket) => {
 // Database configuration
 const sequelize = new Sequelize(process.env.DATABASE_URL || 'postgres://user:password@localhost:5432/traffic_dashboard', {
   dialect: 'postgres',
-  ssl: process.env.NODE_ENV === 'production',
   dialectOptions: {
-    ssl: process.env.NODE_ENV === 'production' ? {
+    ssl: {
       require: true,
       rejectUnauthorized: false
-    } : false
+    }
   }
 });
 
