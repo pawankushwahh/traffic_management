@@ -31,9 +31,54 @@ console.log('Checking paths:');
 console.log('Build path:', buildPath);
 console.log('Public path:', publicPath);
 
-// First try to serve from build directory, then fallback to public
-app.use(express.static(buildPath));
-app.use(express.static(publicPath));
+// Serve manifest.json with correct content type
+app.get('/manifest.json', (req, res) => {
+  const manifestPath = path.join(buildPath, 'manifest.json');
+  const publicManifestPath = path.join(publicPath, 'manifest.json');
+  
+  if (fs.existsSync(manifestPath)) {
+    res.set('Content-Type', 'application/json');
+    res.sendFile(manifestPath);
+  } else if (fs.existsSync(publicManifestPath)) {
+    res.set('Content-Type', 'application/json');
+    res.sendFile(publicManifestPath);
+  } else {
+    // Provide a default manifest if none exists
+    res.set('Content-Type', 'application/json');
+    res.json({
+      "short_name": "Traffic Dashboard",
+      "name": "Traffic and Women Safety Dashboard",
+      "icons": [
+        {
+          "src": "favicon.ico",
+          "sizes": "64x64 32x32 24x24 16x16",
+          "type": "image/x-icon"
+        }
+      ],
+      "start_url": ".",
+      "display": "standalone",
+      "theme_color": "#000000",
+      "background_color": "#ffffff"
+    });
+  }
+});
+
+// Serve static files from build directory first, then public
+app.use(express.static(buildPath, {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.json')) {
+      res.set('Content-Type', 'application/json');
+    }
+  }
+}));
+
+app.use(express.static(publicPath, {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.json')) {
+      res.set('Content-Type', 'application/json');
+    }
+  }
+}));
 
 // Configure multer for file uploads with no size limit
 const storage = multer.diskStorage({
