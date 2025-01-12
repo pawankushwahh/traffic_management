@@ -56,24 +56,6 @@ const HomePage = () => {
       link: "/vehicle-analytics"
     },
     {
-      title: "Emergency Response",
-      description: "Automatic emergency vehicle detection and priority signal management",
-      icon: <FaExclamationTriangle />,
-      link: "/emergency-response"
-    },
-    {
-      title: "Violation Detection",
-      description: "Automated detection of traffic violations using AI and CCTV footage",
-      icon: <FaCamera />,
-      link: "/violation-detection"
-    },
-    {
-      title: "Pedestrian Safety",
-      description: "Smart crosswalk management and pedestrian density analysis",
-      icon: <FaUserShield />,
-      link: "/pedestrian-safety"
-    },
-    {
       title: "System Analytics",
       description: "Comprehensive analytics dashboard for traffic patterns and system performance",
       icon: <FaChartLine />,
