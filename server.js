@@ -23,6 +23,9 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'frontend/build')));
+
 // Configure multer for file uploads with no size limit
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -292,6 +295,12 @@ app.get('/api/signal-status', (req, res) => {
     ]
   };
   res.json(mockData);
+});
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
 });
 
 // WebSocket connection handling
