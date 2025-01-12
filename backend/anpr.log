@@ -1,0 +1,8 @@
+2025-01-12 02:08:07,681 - INFO - Initializing ANPR Processor
+2025-01-12 02:08:07,683 - WARNING - Neither CUDA nor MPS are available - defaulting to CPU. Note: This module is much faster with a GPU.
+2025-01-12 02:08:07,692 - WARNING - Downloading detection model, please wait. This may take several minutes depending upon your network connection.
+2025-01-12 02:08:12,710 - ERROR - Error initializing EasyOCR: 'charmap' codec can't encode character '\u2588' in position 12: character maps to <undefined>
+2025-01-12 04:08:51,541 - INFO - Initializing ANPR Processor
+2025-01-12 04:08:51,543 - WARNING - Neither CUDA nor MPS are available - defaulting to CPU. Note: This module is much faster with a GPU.
+2025-01-12 04:08:51,556 - WARNING - Downloading detection model, please wait. This may take several minutes depending upon your network connection.
+2025-01-12 04:08:54,941 - ERROR - Error initializing EasyOCR: 'charmap' codec can't encode character '\u2588' in position 12: character maps to <undefined>
