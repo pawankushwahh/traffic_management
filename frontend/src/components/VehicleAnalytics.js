@@ -39,76 +39,7 @@ const VehicleAnalytics = () => {
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     setSelectedFile(file);
-    setError(null);
-
-    // Preview video
-    if (file) {
-      const url = URL.createObjectURL(file);
-      if (videoRef.current) {
-        videoRef.current.src = url;
-      }
-    }
   };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setError('Please select a video file first');
-      return;
-    }
-
-    setProcessing(true);
-    setError(null);
-
-    const formData = new FormData();
-    formData.append('video', selectedFile);
-
-    try {
-      const response = await axios.post(`${BACKEND_URL}/video/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      setTaskId(response.data.task_id);
-      startProgressPolling(response.data.task_id);
-    } catch (err) {
-      setError('Error uploading video: ' + err.message);
-      setProcessing(false);
-    }
-  };
-
-  const startProgressPolling = (id) => {
-    if (progressInterval.current) {
-      clearInterval(progressInterval.current);
-    }
-
-    progressInterval.current = setInterval(async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/video/progress/${id}`);
-        const { progress, current_results } = response.data;
-        
-        setProgress(progress);
-        if (current_results) {
-          setResults(current_results);
-        }
-
-        if (progress === 100) {
-          clearInterval(progressInterval.current);
-          setProcessing(false);
-        }
-      } catch (err) {
-        console.error('Error checking progress:', err);
-      }
-    }, 1000);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current);
-      }
-    };
-  }, []);
 
   const renderResults = () => {
     if (!results) return null;
@@ -184,71 +115,20 @@ const VehicleAnalytics = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-6 px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Video Analysis</h1>
+        <h1 className="text-3xl font-bold mb-8">Vehicle Analytics</h1>
         
-        {/* Video Upload Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">Upload Traffic Video</h2>
-            <input
-              type="file"
-              accept=".mp4,.avi,.mov"
-              onChange={handleFileSelect}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-            />
+        <div>
+          <h2>Vehicle Analytics</h2>
+          <p>Demo Animation: (Here you can include a demo animation or example)</p>
+          <div className="demo-animation">
+            {/* Include your demo animation component or code here */}
           </div>
-
-          {/* Video Preview */}
-          {selectedFile && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Preview</h3>
-              <video
-                ref={videoRef}
-                className="w-full max-h-[400px] rounded"
-                controls
-              />
-            </div>
-          )}
-
-          {/* Upload Button & Progress */}
-          <div className="space-y-4">
-            <button
-              onClick={handleUpload}
-              disabled={!selectedFile || processing}
-              className={`px-4 py-2 rounded-lg text-white font-medium ${
-                !selectedFile || processing
-                  ? 'bg-gray-400'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-            >
-              {processing ? 'Processing...' : 'Analyze Video'}
-            </button>
-
-            {processing && (
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${progress}%` }}
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  Processing: {progress.toFixed(1)}%
-                </p>
-              </div>
-            )}
-
-            {error && (
-              <p className="text-red-500">{error}</p>
-            )}
-          </div>
+          <h3>Examples:</h3>
+          <ul>
+            <li>Example 1: Description of the first example.</li>
+            <li>Example 2: Description of the second example.</li>
+          </ul>
         </div>
-
-        {/* Analysis Results */}
-        {renderResults()}
       </div>
     </div>
   );
