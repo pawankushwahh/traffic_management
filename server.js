@@ -31,15 +31,29 @@ app.use((req, res, next) => {
 
 // Serve static files from the React app
 const buildPath = path.join(__dirname, 'build');
-console.log('Attempting to serve static files from:', buildPath);
+console.log('Server startup - Build path:', buildPath);
 
+// Check build directory on startup
 if (fs.existsSync(buildPath)) {
-  console.log('Build directory exists, contents:', fs.readdirSync(buildPath));
-  app.use(express.static(buildPath));
+  console.log('Build directory exists on startup');
+  console.log('Build directory contents:', fs.readdirSync(buildPath));
+  
+  const indexPath = path.join(buildPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    console.log('index.html found on startup');
+  } else {
+    console.log('index.html not found on startup');
+  }
 } else {
-  console.log('Build directory does not exist at:', buildPath);
-  console.log('Current directory contents:', fs.readdirSync(__dirname));
+  console.log('Build directory not found on startup');
 }
+
+// Serve static files with detailed logging
+app.use(express.static(buildPath, {
+  setHeaders: (res, file) => {
+    console.log('Serving static file:', file);
+  }
+}));
 
 // Serve manifest.json with correct content type
 app.get('/manifest.json', (req, res) => {
@@ -356,14 +370,15 @@ app.get('*', (req, res) => {
     console.log('Found index.html, sending file');
     res.sendFile(indexPath);
   } else {
-    console.log('index.html not found');
+    console.log('index.html not found, sending error page');
     res.status(404).send(`
       <html>
         <head>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
             .error { color: red; }
-            .code { background: #f0f0f0; padding: 10px; border-radius: 4px; }
+            .code { background: #f0f0f0; padding: 10px; border-radius: 4px; margin: 10px 0; }
+            .warning { color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 4px; }
           </style>
         </head>
         <body>
@@ -388,6 +403,11 @@ PWD: ${process.env.PWD}
 
           <h3>Build Directory Contents (if exists):</h3>
           <pre class="code">${fs.existsSync(buildPath) ? JSON.stringify(fs.readdirSync(buildPath), null, 2) : 'Build directory does not exist'}</pre>
+          
+          <div class="warning">
+            <strong>Note:</strong> If you're seeing this error, it means the frontend build files were not properly copied to the server.
+            Check the build logs for any errors during the build process.
+          </div>
         </body>
       </html>
     `);
