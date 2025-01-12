@@ -24,7 +24,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'frontend/build')));
+const buildPath = path.resolve(__dirname, './frontend/build');
+app.use(express.static(buildPath));
+console.log('Serving static files from:', buildPath);
 
 // Configure multer for file uploads with no size limit
 const storage = multer.diskStorage({
@@ -300,7 +302,14 @@ app.get('/api/signal-status', (req, res) => {
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
+  const indexPath = path.resolve(__dirname, './frontend/build/index.html');
+  console.log('Trying to serve:', indexPath);
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    console.error('index.html not found at:', indexPath);
+    res.status(404).send('Frontend build not found. Please ensure the frontend is built correctly.');
+  }
 });
 
 // WebSocket connection handling
