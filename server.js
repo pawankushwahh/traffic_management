@@ -24,17 +24,16 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 
 // Serve static files from the React app
-const buildPath = path.resolve(__dirname, 'frontend', 'build');
+const buildPath = path.resolve(__dirname, './frontend/build');
+const publicPath = path.resolve(__dirname, './frontend/public');
+
+console.log('Checking paths:');
 console.log('Build path:', buildPath);
+console.log('Public path:', publicPath);
 
-// Check if build directory exists
-if (!fs.existsSync(buildPath)) {
-  console.error('Build directory not found at:', buildPath);
-  fs.mkdirSync(buildPath, { recursive: true });
-  console.log('Created build directory');
-}
-
+// First try to serve from build directory, then fallback to public
 app.use(express.static(buildPath));
+app.use(express.static(publicPath));
 
 // Configure multer for file uploads with no size limit
 const storage = multer.diskStorage({
@@ -311,25 +310,39 @@ app.get('/api/signal-status', (req, res) => {
 // match one above, send back React's index.html file.
 app.get('*', (req, res) => {
   const indexPath = path.join(buildPath, 'index.html');
-  console.log('Request path:', req.path);
-  console.log('Trying to serve index.html from:', indexPath);
+  const publicIndexPath = path.join(publicPath, 'index.html');
   
+  console.log('Request path:', req.path);
+  console.log('Checking index at:', indexPath);
+  console.log('Checking public index at:', publicIndexPath);
+
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
+  } else if (fs.existsSync(publicIndexPath)) {
+    res.sendFile(publicIndexPath);
   } else {
-    console.error('index.html not found at:', indexPath);
+    console.error('No index.html found in either build or public directory');
     res.status(404).send(`
       <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .error { color: red; }
+            .path { font-family: monospace; background: #f0f0f0; padding: 5px; }
+          </style>
+        </head>
         <body>
-          <h1>Build Not Found</h1>
-          <p>The frontend build was not found. This could be because:</p>
+          <h1 class="error">Frontend Files Not Found</h1>
+          <p>The frontend files could not be located. Here's what we checked:</p>
           <ul>
-            <li>The build process hasn't completed yet</li>
-            <li>The build process failed</li>
-            <li>The build directory is not in the correct location</li>
+            <li>Build directory: <span class="path">${buildPath}</span></li>
+            <li>Public directory: <span class="path">${publicPath}</span></li>
+            <li>Build index: <span class="path">${indexPath}</span></li>
+            <li>Public index: <span class="path">${publicIndexPath}</span></li>
           </ul>
-          <p>Build path: ${buildPath}</p>
-          <p>Index path: ${indexPath}</p>
+          <p>Current working directory: <span class="path">${process.cwd()}</span></p>
+          <p>Directory contents:</p>
+          <pre>${fs.existsSync(__dirname) ? fs.readdirSync(__dirname).join('\n') : 'Directory not accessible'}</pre>
         </body>
       </html>
     `);

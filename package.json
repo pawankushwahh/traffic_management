@@ -5,8 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "chmod +x build.sh && ./build.sh",
-    "verify": "node verify-build.js",
+    "build": "cd frontend && npm install --legacy-peer-deps && npm run build && cd .. && npm install",
     "dev": "nodemon server.js"
   },
   "dependencies": {
