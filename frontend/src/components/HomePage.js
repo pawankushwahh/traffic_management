@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaCarSide, FaVideo, FaCamera, FaExclamationTriangle, FaUserShield, FaChartLine } from 'react-icons/fa';
+import { FaCarSide, FaVideo, FaCamera, FaExclamationTriangle, FaUserShield, FaChartLine, FaTrafficLight } from 'react-icons/fa';
 
 const FeatureCard = ({ title, description, icon, link }) => (
   <Link to={link} className="block">
@@ -38,10 +38,16 @@ const HomePage = () => {
       link: "/traffic-dashboard"
     },
     {
+      title: "Signal Automation",
+      description: "Advanced traffic signal automation system inspired by Singapore's smart traffic management",
+      icon: <FaTrafficLight />,
+      link: "/signal-automation"
+    },
+    {
       title: "Vehicle Plate Analytics",
       description: "AI-powered number plate recognition for traffic rule compliance and tax management",
       icon: <FaVideo />,
-      link: "/vehicle-plate"
+      link: "/vehicle-plate-analytics"
     },
     {
       title: "Vehicle Analytics",
