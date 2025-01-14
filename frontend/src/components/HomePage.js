@@ -60,6 +60,12 @@ const HomePage = () => {
       description: "Comprehensive analytics dashboard for traffic patterns and system performance",
       icon: <FaChartLine />,
       link: "/system-analytics"
+    },
+    {
+      title: "Women Safety",
+      description: "Emergency reporting system for women's safety with instant authority notification",
+      icon: <FaUserShield />,
+      link: "/women-safety"
     }
   ];
 
