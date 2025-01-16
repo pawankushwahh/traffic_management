@@ -6,30 +6,24 @@ import SOSPage from './SOSPage';
 const WomenSafetyPage = () => {
   const [showEmergencyForm, setShowEmergencyForm] = useState(false);
   const [showMobileForm, setShowMobileForm] = useState(false);
-  const [showSOS, setShowSOS] = useState(false);
+  const [showSOS, setShowSOS] = useState(true); // Set to true by default
 
   if (showEmergencyForm) {
     return <ComplaintForm isEmergencyButton={true} />;
   }
 
-  if (showMobileForm || showSOS) {
+  if (showMobileForm) {
     return (
       <div>
         <div className="flex justify-center space-x-4 mb-8">
           <button
-            onClick={() => {
-              setShowSOS(true);
-              setShowMobileForm(false);
-            }}
+            onClick={() => setShowSOS(true)}
             className={`px-4 py-2 rounded ${showSOS ? 'bg-red-600 text-white' : 'bg-gray-200'}`}
           >
             SOS
           </button>
           <button
-            onClick={() => {
-              setShowSOS(false);
-              setShowMobileForm(true);
-            }}
+            onClick={() => setShowSOS(false)}
             className={`px-4 py-2 rounded ${!showSOS ? 'bg-red-600 text-white' : 'bg-gray-200'}`}
           >
             File Complaint
@@ -70,7 +64,10 @@ const WomenSafetyPage = () => {
 
         {/* Mobile App Feature */}
         <div 
-          onClick={() => setShowMobileForm(true)}
+          onClick={() => {
+            setShowMobileForm(true);
+            setShowSOS(true); // Ensure SOS is shown by default
+          }}
           className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
         >
           <div className="text-blue-600 text-4xl mb-4">

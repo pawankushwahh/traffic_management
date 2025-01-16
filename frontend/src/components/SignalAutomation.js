@@ -13,6 +13,8 @@ import {
 } from 'chart.js';
 import { FaCar, FaTrafficLight, FaLeaf } from 'react-icons/fa';
 import { MdEmergency } from 'react-icons/md';
+import ModelDevelopment from './ModelDevelopment';
+import { FaCode, FaArrowLeft } from 'react-icons/fa';
 
 ChartJS.register(
   CategoryScale,
@@ -34,6 +36,8 @@ const SignalAutomation = () => {
 
   const [simulationActive, setSimulationActive] = useState(false);
   const simulationRef = useRef(null);
+
+  const [showModelDev, setShowModelDev] = useState(false);
 
   const chartData = {
     labels: ['Junction 1', 'Junction 2', 'Junction 3', 'Junction 4'],
@@ -124,6 +128,20 @@ const SignalAutomation = () => {
     }
   ];
 
+  if (showModelDev) {
+    return (
+      <div>
+        <button
+          onClick={() => setShowModelDev(false)}
+          className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
+        >
+          <FaArrowLeft className="mr-2" /> Back to Signal Automation
+        </button>
+        <ModelDevelopment />
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -207,6 +225,17 @@ const SignalAutomation = () => {
             <p className="text-gray-600">{benefit.description}</p>
           </motion.div>
         ))}
+      </div>
+
+      {/* Model Development Button */}
+      <div className="mt-8 text-center">
+        <button
+          onClick={() => setShowModelDev(true)}
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
+        >
+          <FaCode className="mr-2" />
+          View Model Development Process
+        </button>
       </div>
     </motion.div>
   );
