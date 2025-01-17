@@ -66,6 +66,12 @@ const HomePage = () => {
       description: "Emergency reporting system for women's safety with instant authority notification",
       icon: <FaUserShield />,
       link: "/women-safety"
+    },
+    {
+      title: "CCTV Automation",
+      description: "Real-time traffic signal automation using computer vision and AI analysis of CCTV feeds",
+      icon: <FaVideo />,
+      link: "/cctv-automation"
     }
   ];
 
