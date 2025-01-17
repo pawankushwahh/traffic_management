@@ -12,6 +12,7 @@ import io from 'socket.io-client';
 import axios from 'axios';
 import WomenSafetyPage from './components/WomenSafety/WomenSafetyPage';
 import CCTVAutomation from './components/CCTVAutomation';
+import AdaptiveSignalTimer from './components/AdaptiveSignalTimer';
 import './App.css';
 
 const BACKEND_URL = 'http://localhost:5000';
@@ -122,6 +123,7 @@ function App() {
           <Route path="/statistics" element={<Statistics stats={stats} />} />
           <Route path="/women-safety" element={<WomenSafetyPage />} />
           <Route path="/cctv-automation" element={<CCTVAutomation />} />
+          <Route path="/adaptive-timer" element={<AdaptiveSignalTimer />} />
         </Routes>
       </div>
     </Router>
