@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import VehiclePlateAnalytics from './components/VehiclePlateAnalytics';
 import TrafficMap from './components/TrafficMap';
 import SignalStatus from './components/SignalStatus';
 import Statistics from './components/Statistics';
-import VehicleAnalytics from './components/VehicleAnalytics';
 import TrafficDashboard from './components/TrafficDashboard';
 import SignalAutomation from './components/SignalAutomation';
 import io from 'socket.io-client';
@@ -98,9 +97,6 @@ function App() {
                 <Link to="/traffic-dashboard" className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
                   Dashboard
                 </Link>
-                <Link to="/vehicle-analytics" className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
-                  Vehicle Analytics
-                </Link>
                 <Link to="/signal-automation" className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
                   Signal Automation
                 </Link>
@@ -112,7 +108,6 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/traffic-dashboard" element={<TrafficDashboard />} />
-          <Route path="/vehicle-analytics" element={<VehicleAnalytics />} />
           <Route path="/signal-automation" element={<SignalAutomation />} />
           <Route
             path="/vehicle-plate-analytics"
