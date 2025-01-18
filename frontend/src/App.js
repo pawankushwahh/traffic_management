@@ -12,6 +12,7 @@ import axios from 'axios';
 import WomenSafetyPage from './components/WomenSafety/WomenSafetyPage';
 import CCTVAutomation from './components/CCTVAutomation';
 import AdaptiveTimer from './components/AdaptiveTimer';
+import IntegratedTrafficControl from './components/IntegratedTrafficControl';
 import './App.css';
 
 const BACKEND_URL = 'http://localhost:5000';
@@ -97,6 +98,9 @@ function App() {
                 <Link to="/traffic-dashboard" className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
                   Dashboard
                 </Link>
+                <Link to="/integrated-control" className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
+                  Integrated Control
+                </Link>
                 <Link to="/signal-automation" className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
                   Signal Automation
                 </Link>
@@ -108,6 +112,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/traffic-dashboard" element={<TrafficDashboard />} />
+          <Route path="/integrated-control" element={<IntegratedTrafficControl />} />
           <Route path="/signal-automation" element={<SignalAutomation />} />
           <Route
             path="/vehicle-plate-analytics"
