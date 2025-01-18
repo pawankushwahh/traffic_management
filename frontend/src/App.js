@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import VehiclePlateAnalytics from './components/VehiclePlateAnalytics';
 import TrafficMap from './components/TrafficMap';
@@ -12,7 +12,7 @@ import io from 'socket.io-client';
 import axios from 'axios';
 import WomenSafetyPage from './components/WomenSafety/WomenSafetyPage';
 import CCTVAutomation from './components/CCTVAutomation';
-import AdaptiveSignalTimer from './components/AdaptiveSignalTimer';
+import AdaptiveTimer from './components/AdaptiveTimer';
 import './App.css';
 
 const BACKEND_URL = 'http://localhost:5000';
@@ -123,7 +123,7 @@ function App() {
           <Route path="/statistics" element={<Statistics stats={stats} />} />
           <Route path="/women-safety" element={<WomenSafetyPage />} />
           <Route path="/cctv-automation" element={<CCTVAutomation />} />
-          <Route path="/adaptive-timer" element={<AdaptiveSignalTimer />} />
+          <Route path="/adaptive-timer" element={<AdaptiveTimer />} />
         </Routes>
       </div>
     </Router>

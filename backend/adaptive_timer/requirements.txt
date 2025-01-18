@@ -1,0 +1,5 @@
+pygame==2.0.1
+opencv-python==4.5.3.56
+numpy==1.19.5
+darkflow==1.0.0
+tensorflow==2.5.0

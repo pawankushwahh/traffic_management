@@ -50,18 +50,6 @@ const HomePage = () => {
       link: "/vehicle-plate-analytics"
     },
     {
-      title: "Vehicle Analytics",
-      description: "Real-time vehicle counting, classification, and traffic pattern analysis using computer vision",
-      icon: <FaVideo />,
-      link: "/vehicle-analytics"
-    },
-    {
-      title: "System Analytics",
-      description: "Comprehensive analytics dashboard for traffic patterns and system performance",
-      icon: <FaChartLine />,
-      link: "/system-analytics"
-    },
-    {
       title: "Women Safety",
       description: "Emergency reporting system for women's safety with instant authority notification",
       icon: <FaUserShield />,
