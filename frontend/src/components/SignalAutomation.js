@@ -127,37 +127,44 @@ const SignalAutomation = () => {
   const switchSignals = () => {
     setJunctions(prevJunctions => {
       const newJunctions = [...prevJunctions];
+      const currentJunction = newJunctions[currentGreenIndex];
       
-      // Get density of current green junction
-      const currentDensity = newJunctions[currentGreenIndex].density;
-      
-      // Calculate green time based on current density
-      const greenTime = calculateGreenTime(currentDensity);
-      
-      // Update all junction timers and signals
-      newJunctions.forEach((junction, index) => {
-        if (index === currentGreenIndex) {
-          junction.signal = 'green';
-          junction.timer = greenTime;
-        } else {
-          junction.signal = 'red';
-          junction.timer = calculateRedTime(greenTime, index, currentGreenIndex);
-          
-          // Set yellow signal for next junction in sequence
-          if (index === (currentGreenIndex + 1) % 4) {
-            junction.signal = 'yellow';
+      // Only switch if current green signal timer is at 0
+      if (currentJunction.timer <= 0) {
+        // Calculate next green index in cyclic order
+        const nextGreenIndex = (currentGreenIndex + 1) % 4;
+        const nextJunction = newJunctions[nextGreenIndex];
+        
+        // Calculate green time for next junction based on its density
+        const greenTime = calculateGreenTime(nextJunction.density);
+        
+        // Update all junction signals and timers
+        newJunctions.forEach((junction, index) => {
+          if (index === nextGreenIndex) {
+            // Next junction gets green
+            junction.signal = 'green';
+            junction.timer = greenTime;
+          } else if (index === currentGreenIndex) {
+            // Current green changes to red
+            junction.signal = 'red';
+            junction.timer = greenTime * ((4 + index - nextGreenIndex) % 4); // Time until its next turn
+          } else {
+            // Other junctions stay red with updated wait times
+            junction.signal = 'red';
+            junction.timer = greenTime * ((4 + index - nextGreenIndex) % 4); // Time until their turn
           }
-        }
-      });
+        });
+        
+        // Set yellow signal for the next junction in sequence
+        const futureGreenIndex = (nextGreenIndex + 1) % 4;
+        newJunctions[futureGreenIndex].signal = 'yellow';
+        
+        // Update current green index
+        setCurrentGreenIndex(nextGreenIndex);
+      }
       
       return newJunctions;
     });
-    
-    // Move to next junction after current green time expires
-    const currentGreenTime = calculateGreenTime(junctions[currentGreenIndex].density);
-    setTimeout(() => {
-      setCurrentGreenIndex((prev) => (prev + 1) % 4);
-    }, currentGreenTime * 1000);
   };
 
   useEffect(() => {
@@ -176,16 +183,25 @@ const SignalAutomation = () => {
         });
       }, 2000);
 
-      // Initialize signal switching
-      switchSignals();
+      // Initialize first green signal if not already set
+      if (!junctions.some(j => j.signal === 'green')) {
+        switchSignals();
+      }
       
-      // Update timers every second
+      // Update timers every second and check for signal changes
       timerRef.current = setInterval(() => {
         setJunctions(prevJunctions => {
-          return prevJunctions.map(junction => ({
+          const newJunctions = prevJunctions.map(junction => ({
             ...junction,
             timer: Math.max(0, junction.timer - 1),
           }));
+          
+          // Check if current green signal timer is at 0
+          if (newJunctions[currentGreenIndex].timer === 0) {
+            switchSignals();
+          }
+          
+          return newJunctions;
         });
       }, 1000);
     } else {
