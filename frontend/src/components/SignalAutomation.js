@@ -83,12 +83,18 @@ const SignalAutomation = () => {
 
   // Calculate signal timing based on traffic density
   const calculateGreenTime = (density) => {
-    // Minimum time of 10 seconds, maximum of 60 seconds
-    const minTime = 10;
-    const maxTime = 60;
-    // Calculate time based on density
-    const calculatedTime = minTime + Math.floor((density / 100) * (maxTime - minTime));
-    return calculatedTime;
+    // Define timing based on density ranges
+    if (density <= 10) {
+      return 10; // 1-10% density: 10 seconds
+    } else if (density <= 30) {
+      return 20; // 10-30% density: 20 seconds
+    } else if (density <= 50) {
+      return 30; // 30-50% density: 30 seconds
+    } else if (density <= 75) {
+      return 40; // 50-75% density: 40 seconds
+    } else {
+      return 60; // 75-100% density: 60 seconds
+    }
   };
 
   // Calculate red time for other signals based on current green signal
@@ -105,13 +111,16 @@ const SignalAutomation = () => {
     const isRushHour = (timeOfDay >= 8 && timeOfDay <= 10) || (timeOfDay >= 16 && timeOfDay <= 18);
     
     // Base density varies by time of day
-    let baseDensity = isRushHour ? 70 : 40;
+    let baseDensity = isRushHour ? 75 : 35;
     
     // Add some randomization
-    const variation = Math.random() * 30 - 15; // ±15
+    const variation = Math.random() * 20 - 10; // ±10
     
-    // Ensure density stays within bounds
-    return Math.max(10, Math.min(100, baseDensity + variation)); // Minimum 10% density
+    // Ensure density stays within bounds and aligns with our timing ranges
+    const density = Math.max(1, Math.min(100, baseDensity + variation));
+    
+    // Round to nearest 5% for more stable readings
+    return Math.round(density / 5) * 5;
   };
 
   // Switch signals based on timer
@@ -209,6 +218,32 @@ const SignalAutomation = () => {
           <FaTrafficLight className="text-green-500" />
           Intelligent Traffic Signal Control
         </h1>
+
+        <div className="mb-6 bg-white rounded-lg shadow-lg p-4">
+          <h2 className="text-xl font-semibold mb-3">Signal Timing Rules</h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+            <div className="p-2 bg-gray-50 rounded">
+              <div className="font-semibold">1-10%</div>
+              <div className="text-gray-600">10 sec</div>
+            </div>
+            <div className="p-2 bg-gray-50 rounded">
+              <div className="font-semibold">10-30%</div>
+              <div className="text-gray-600">20 sec</div>
+            </div>
+            <div className="p-2 bg-gray-50 rounded">
+              <div className="font-semibold">30-50%</div>
+              <div className="text-gray-600">30 sec</div>
+            </div>
+            <div className="p-2 bg-gray-50 rounded">
+              <div className="font-semibold">50-75%</div>
+              <div className="text-gray-600">40 sec</div>
+            </div>
+            <div className="p-2 bg-gray-50 rounded">
+              <div className="font-semibold">75-100%</div>
+              <div className="text-gray-600">60 sec</div>
+            </div>
+          </div>
+        </div>
 
         <div className="cctv-grid">
           {junctions.map((junction, index) => (
