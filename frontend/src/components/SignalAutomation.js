@@ -11,10 +11,12 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { FaCar, FaTrafficLight, FaVideo, FaChartLine } from 'react-icons/fa';
+import { FaCar, FaTrafficLight, FaVideo, FaChartLine, FaShieldAlt } from 'react-icons/fa';
 import { MdTimer, MdAutorenew } from 'react-icons/md';
 import { BiCctv } from 'react-icons/bi';
+import RuleViolationDetection from './RuleViolationDetection';
 import './SignalAutomation.css';
+import './RuleViolationDetection.css';
 
 ChartJS.register(
   CategoryScale,
@@ -37,6 +39,8 @@ const SignalAutomation = () => {
   const [currentGreenIndex, setCurrentGreenIndex] = useState(0);
   const [simulationActive, setSimulationActive] = useState(false);
   const [cctvActive, setCctvActive] = useState(true);
+  const [violationDetectionActive, setViolationDetectionActive] = useState(false);
+  const [recentViolations, setRecentViolations] = useState([]);
   const simulationRef = useRef(null);
   const timerRef = useRef(null);
   const videoRefs = useRef([]);
@@ -167,6 +171,14 @@ const SignalAutomation = () => {
     });
   };
 
+  const handleViolationDetected = (challan) => {
+    setRecentViolations(prev => [challan, ...prev].slice(0, 10)); // Keep last 10 violations
+    
+    // Simulate notification to police and vehicle owner
+    console.log(`SMS sent to police: New violation detected at ${challan.location}`);
+    console.log(`SMS sent to vehicle owner ${challan.vehicleNumber}: E-challan generated`);
+  };
+
   useEffect(() => {
     if (simulationActive) {
       // Update traffic density every 2 seconds
@@ -230,10 +242,20 @@ const SignalAutomation = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold mb-6 flex items-center gap-3">
-          <FaTrafficLight className="text-green-500" />
-          Intelligent Traffic Signal Control
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <FaTrafficLight className="text-green-500" />
+            Intelligent Traffic Signal Control
+          </h1>
+          
+          <button
+            className={`control-button ${violationDetectionActive ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'}`}
+            onClick={() => setViolationDetectionActive(!violationDetectionActive)}
+          >
+            <FaShieldAlt />
+            {violationDetectionActive ? 'Disable Rule Violation Detection' : 'Enable Rule Violation Detection'}
+          </button>
+        </div>
 
         <div className="mb-6 bg-white rounded-lg shadow-lg p-4">
           <h2 className="text-xl font-semibold mb-3">Signal Timing Rules</h2>
@@ -341,8 +363,19 @@ const SignalAutomation = () => {
           </button>
         </div>
 
-        <div className="chart-container">
-          <Line data={chartData} options={chartOptions} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <div className="chart-container">
+            <Line data={chartData} options={chartOptions} />
+          </div>
+          
+          {violationDetectionActive && (
+            <div className="violation-container">
+              <RuleViolationDetection
+                junctionId={currentGreenIndex + 1}
+                onViolationDetected={handleViolationDetected}
+              />
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
