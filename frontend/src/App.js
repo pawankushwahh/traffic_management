@@ -13,6 +13,7 @@ import WomenSafetyPage from './components/WomenSafety/WomenSafetyPage';
 import CCTVAutomation from './components/CCTVAutomation';
 import AdaptiveTimer from './components/AdaptiveTimer';
 import IntegratedTrafficControl from './components/IntegratedTrafficControl';
+import TrafficViolationDetection from './components/TrafficViolationDetection';
 import './App.css';
 
 const BACKEND_URL = 'http://localhost:5000';
@@ -104,6 +105,9 @@ function App() {
                 <Link to="/signal-automation" className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
                   Signal Automation
                 </Link>
+                <Link to="/violations" className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
+                  Rule Violations
+                </Link>
               </div>
             </div>
           </div>
@@ -124,6 +128,7 @@ function App() {
           <Route path="/women-safety" element={<WomenSafetyPage />} />
           <Route path="/cctv-automation" element={<CCTVAutomation />} />
           <Route path="/adaptive-timer" element={<AdaptiveTimer />} />
+          <Route path="/violations" element={<TrafficViolationDetection />} />
         </Routes>
       </div>
     </Router>
