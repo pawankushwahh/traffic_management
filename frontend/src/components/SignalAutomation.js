@@ -28,15 +28,17 @@ ChartJS.register(
 
 const SignalAutomation = () => {
   const [junctions, setJunctions] = useState([
-    { id: 1, name: 'North Junction', density: 0, signal: 'red', waitTime: 0 },
-    { id: 2, name: 'South Junction', density: 0, signal: 'red', waitTime: 0 },
-    { id: 3, name: 'East Junction', density: 0, signal: 'red', waitTime: 0 },
-    { id: 4, name: 'West Junction', density: 0, signal: 'red', waitTime: 0 },
+    { id: 1, name: 'North Junction', density: 0, signal: 'red', waitTime: 0, timer: 0 },
+    { id: 2, name: 'South Junction', density: 0, signal: 'red', waitTime: 0, timer: 0 },
+    { id: 3, name: 'East Junction', density: 0, signal: 'red', waitTime: 0, timer: 0 },
+    { id: 4, name: 'West Junction', density: 0, signal: 'red', waitTime: 0, timer: 0 },
   ]);
 
+  const [currentGreenIndex, setCurrentGreenIndex] = useState(0);
   const [simulationActive, setSimulationActive] = useState(false);
   const [cctvActive, setCctvActive] = useState(true);
   const simulationRef = useRef(null);
+  const timerRef = useRef(null);
   const videoRefs = useRef([]);
 
   // Chart configuration
@@ -79,46 +81,121 @@ const SignalAutomation = () => {
     },
   };
 
-  // Simulated YOLO detection results
-  const detectTraffic = (videoElement) => {
-    // Simulated YOLO detection - would be replaced with actual ML model
-    return Math.floor(Math.random() * 100);
+  // Calculate signal timing based on traffic density
+  const calculateGreenTime = (density) => {
+    // Base time of 30 seconds
+    const baseTime = 30;
+    // Additional time based on density (up to 30 more seconds)
+    const additionalTime = Math.floor((density / 100) * 30);
+    return baseTime + additionalTime;
+  };
+
+  // Calculate red time for other signals based on current green signal
+  const calculateRedTime = (greenTime, position, currentGreen) => {
+    // Calculate how many signals ahead this one is from the current green
+    const distance = (position - currentGreen + 4) % 4;
+    return greenTime * distance;
+  };
+
+  // Simulated YOLO detection results with more realistic patterns
+  const detectTraffic = (videoElement, junctionId) => {
+    // Simulate more realistic traffic patterns
+    const timeOfDay = new Date().getHours();
+    const isRushHour = (timeOfDay >= 8 && timeOfDay <= 10) || (timeOfDay >= 16 && timeOfDay <= 18);
+    
+    // Base density varies by time of day
+    let baseDensity = isRushHour ? 70 : 40;
+    
+    // Add some randomization
+    const variation = Math.random() * 30 - 15; // ±15
+    
+    // Ensure density stays within bounds
+    return Math.max(0, Math.min(100, baseDensity + variation));
+  };
+
+  // Switch signals based on timer
+  const switchSignals = () => {
+    setJunctions(prevJunctions => {
+      const newJunctions = [...prevJunctions];
+      
+      // Get density of current green junction
+      const currentDensity = newJunctions[currentGreenIndex].density;
+      
+      // Calculate green time based on current density
+      const greenTime = calculateGreenTime(currentDensity);
+      
+      // Update all junction timers and signals
+      newJunctions.forEach((junction, index) => {
+        if (index === currentGreenIndex) {
+          junction.signal = 'green';
+          junction.timer = greenTime;
+        } else {
+          junction.signal = 'red';
+          junction.timer = calculateRedTime(greenTime, index, currentGreenIndex);
+          
+          // Set yellow signal for next junction in sequence
+          if (index === (currentGreenIndex + 1) % 4) {
+            junction.signal = 'yellow';
+          }
+        }
+      });
+      
+      return newJunctions;
+    });
+    
+    // Move to next junction after current green time expires
+    const currentGreenTime = calculateGreenTime(junctions[currentGreenIndex].density);
+    setTimeout(() => {
+      setCurrentGreenIndex((prev) => (prev + 1) % 4);
+    }, currentGreenTime * 1000);
   };
 
   useEffect(() => {
     if (simulationActive) {
+      // Update traffic density every 2 seconds
       simulationRef.current = setInterval(() => {
         setJunctions(prevJunctions => {
           return prevJunctions.map(junction => {
-            const density = detectTraffic(videoRefs.current[junction.id - 1]);
-            const waitTime = Math.floor(density * 0.5); // Simplified wait time calculation
-            
-            let newSignal = 'red';
-            if (density > 70) {
-              newSignal = 'green';
-            } else if (density > 40) {
-              newSignal = 'yellow';
-            }
-
+            const density = detectTraffic(videoRefs.current[junction.id - 1], junction.id);
             return {
               ...junction,
               density,
-              waitTime,
-              signal: newSignal,
+              waitTime: Math.floor(junction.timer),
             };
           });
         });
       }, 2000);
-    } else if (simulationRef.current) {
-      clearInterval(simulationRef.current);
+
+      // Initialize signal switching
+      switchSignals();
+      
+      // Update timers every second
+      timerRef.current = setInterval(() => {
+        setJunctions(prevJunctions => {
+          return prevJunctions.map(junction => ({
+            ...junction,
+            timer: Math.max(0, junction.timer - 1),
+          }));
+        });
+      }, 1000);
+    } else {
+      if (simulationRef.current) {
+        clearInterval(simulationRef.current);
+      }
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     }
 
     return () => {
       if (simulationRef.current) {
         clearInterval(simulationRef.current);
       }
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     };
-  }, [simulationActive]);
+  }, [simulationActive, currentGreenIndex]);
 
   return (
     <div className="signal-automation-container">
@@ -161,7 +238,12 @@ const SignalAutomation = () => {
               <div className="signal-controls mt-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">{junction.name}</h3>
-                  <div className={`signal-light ${junction.signal}`} />
+                  <div className="flex items-center gap-2">
+                    <div className={`signal-light ${junction.signal}`}>
+                      <span className="timer-display">{Math.ceil(junction.timer)}s</span>
+                    </div>
+                    <span className="signal-status">{junction.signal.toUpperCase()}</span>
+                  </div>
                 </div>
                 
                 <div className="density-bar">
@@ -176,8 +258,8 @@ const SignalAutomation = () => {
                 </div>
 
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Wait Time: {junction.waitTime}s</span>
-                  <span>Vehicles: {Math.floor(junction.density * 0.8)}</span>
+                  <span>Density: {Math.round(junction.density)}%</span>
+                  <span>Wait Time: {junction.timer > 0 ? Math.ceil(junction.timer) : 0}s</span>
                 </div>
               </div>
             </motion.div>
