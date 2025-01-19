@@ -11,10 +11,10 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { FaCar, FaTrafficLight, FaLeaf } from 'react-icons/fa';
-import { MdEmergency } from 'react-icons/md';
-import ModelDevelopment from './ModelDevelopment';
-import { FaCode, FaArrowLeft } from 'react-icons/fa';
+import { FaCar, FaTrafficLight, FaVideo, FaChartLine } from 'react-icons/fa';
+import { MdTimer, MdAutorenew } from 'react-icons/md';
+import { BiCctv } from 'react-icons/bi';
+import './SignalAutomation.css';
 
 ChartJS.register(
   CategoryScale,
@@ -27,26 +27,35 @@ ChartJS.register(
 );
 
 const SignalAutomation = () => {
-  const [trafficData, setTrafficData] = useState({
-    junction1: { density: 0, signal: 'red' },
-    junction2: { density: 0, signal: 'red' },
-    junction3: { density: 0, signal: 'red' },
-    junction4: { density: 0, signal: 'red' },
-  });
+  const [junctions, setJunctions] = useState([
+    { id: 1, name: 'North Junction', density: 0, signal: 'red', waitTime: 0 },
+    { id: 2, name: 'South Junction', density: 0, signal: 'red', waitTime: 0 },
+    { id: 3, name: 'East Junction', density: 0, signal: 'red', waitTime: 0 },
+    { id: 4, name: 'West Junction', density: 0, signal: 'red', waitTime: 0 },
+  ]);
 
   const [simulationActive, setSimulationActive] = useState(false);
+  const [cctvActive, setCctvActive] = useState(true);
   const simulationRef = useRef(null);
+  const videoRefs = useRef([]);
 
-  const [showModelDev, setShowModelDev] = useState(false);
-
+  // Chart configuration
   const chartData = {
-    labels: ['Junction 1', 'Junction 2', 'Junction 3', 'Junction 4'],
+    labels: junctions.map(j => j.name),
     datasets: [
       {
-        label: 'Traffic Density',
-        data: Object.values(trafficData).map(j => j.density),
+        label: 'Traffic Density (%)',
+        data: junctions.map(j => j.density),
         borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        tension: 0.4,
+      },
+      {
+        label: 'Wait Time (seconds)',
+        data: junctions.map(j => j.waitTime),
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        tension: 0.4,
       },
     ],
   };
@@ -59,7 +68,7 @@ const SignalAutomation = () => {
       },
       title: {
         display: true,
-        text: 'Real-time Traffic Density',
+        text: 'Real-time Traffic Analysis',
       },
     },
     scales: {
@@ -70,28 +79,34 @@ const SignalAutomation = () => {
     },
   };
 
+  // Simulated YOLO detection results
+  const detectTraffic = (videoElement) => {
+    // Simulated YOLO detection - would be replaced with actual ML model
+    return Math.floor(Math.random() * 100);
+  };
+
   useEffect(() => {
     if (simulationActive) {
       simulationRef.current = setInterval(() => {
-        setTrafficData(prev => {
-          const newData = { ...prev };
-          Object.keys(newData).forEach(junction => {
-            // Simulate random traffic density changes
-            newData[junction].density = Math.min(
-              100,
-              Math.max(0, newData[junction].density + (Math.random() - 0.5) * 20)
-            );
+        setJunctions(prevJunctions => {
+          return prevJunctions.map(junction => {
+            const density = detectTraffic(videoRefs.current[junction.id - 1]);
+            const waitTime = Math.floor(density * 0.5); // Simplified wait time calculation
             
-            // Automate signal based on density
-            if (newData[junction].density > 70) {
-              newData[junction].signal = 'green';
-            } else if (newData[junction].density > 30) {
-              newData[junction].signal = 'yellow';
-            } else {
-              newData[junction].signal = 'red';
+            let newSignal = 'red';
+            if (density > 70) {
+              newSignal = 'green';
+            } else if (density > 40) {
+              newSignal = 'yellow';
             }
+
+            return {
+              ...junction,
+              density,
+              waitTime,
+              signal: newSignal,
+            };
           });
-          return newData;
         });
       }, 2000);
     } else if (simulationRef.current) {
@@ -105,139 +120,93 @@ const SignalAutomation = () => {
     };
   }, [simulationActive]);
 
-  const benefits = [
-    {
-      icon: <FaCar className="text-3xl text-blue-500" />,
-      title: 'Reduced Congestion',
-      description: 'Smart signal timing reduces traffic buildup and improves flow'
-    },
-    {
-      icon: <MdEmergency className="text-3xl text-red-500" />,
-      title: 'Emergency Response',
-      description: 'Priority routing for emergency vehicles through automated signal control'
-    },
-    {
-      icon: <FaLeaf className="text-3xl text-green-500" />,
-      title: 'Eco-Friendly',
-      description: 'Less idle time means reduced emissions and fuel consumption'
-    },
-    {
-      icon: <FaTrafficLight className="text-3xl text-yellow-500" />,
-      title: 'Adaptive Control',
-      description: 'Signals adjust in real-time based on actual traffic conditions'
-    }
-  ];
-
-  if (showModelDev) {
-    return (
-      <div>
-        <button
-          onClick={() => setShowModelDev(false)}
-          className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
-        >
-          <FaArrowLeft className="mr-2" /> Back to Signal Automation
-        </button>
-        <ModelDevelopment />
-      </div>
-    );
-  }
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="container mx-auto px-4 py-8"
-    >
-      <h1 className="text-4xl font-bold text-center mb-8">Signal Automation System</h1>
-      
-      {/* Introduction */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Smart Traffic Management</h2>
-        <p className="text-gray-700 leading-relaxed">
-          Inspired by Singapore's advanced traffic systems, our signal automation technology 
-          uses real-time vehicle density data to optimize traffic flow. Through a network of 
-          sensors and smart algorithms, traffic signals automatically adjust their timing to 
-          accommodate varying traffic patterns throughout the day.
-        </p>
-      </div>
+    <div className="signal-automation-container">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-3xl font-bold mb-6 flex items-center gap-3">
+          <FaTrafficLight className="text-green-500" />
+          Intelligent Traffic Signal Control
+        </h1>
 
-      {/* Simulation Control */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold">Real-time Simulation</h2>
-          <button
-            onClick={() => setSimulationActive(!simulationActive)}
-            className={`px-6 py-2 rounded-lg font-semibold ${
-              simulationActive
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'bg-green-500 text-white hover:bg-green-600'
-            }`}
-          >
-            {simulationActive ? 'Stop Simulation' : 'Start Simulation'}
-          </button>
-        </div>
-
-        {/* Traffic Visualization */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {Object.entries(trafficData).map(([junction, data]) => (
-            <div key={junction} className="bg-gray-100 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">{junction.replace(/([A-Z])/g, ' $1').trim()}</h3>
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-sm text-gray-600">Density: {Math.round(data.density)}%</p>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div
-                      className="bg-blue-600 h-2.5 rounded-full"
-                      style={{ width: `${data.density}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div
-                  className={`w-6 h-6 rounded-full ml-4 ${
-                    data.signal === 'red' ? 'bg-red-500' :
-                    data.signal === 'yellow' ? 'bg-yellow-500' : 'bg-green-500'
-                  }`}
-                ></div>
+        <div className="cctv-grid">
+          {junctions.map((junction, index) => (
+            <motion.div
+              key={junction.id}
+              className="cctv-feed"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <video
+                ref={el => videoRefs.current[index] = el}
+                autoPlay
+                muted
+                loop
+                className="w-full h-48 object-cover"
+                style={{ opacity: cctvActive ? 1 : 0.5 }}
+              >
+                <source src={`/traffic-feed-${index + 1}.mp4`} type="video/mp4" />
+              </video>
+              
+              <div className="analytics-overlay">
+                <BiCctv />
+                <span className="live-indicator">LIVE</span>
+                <span>{junction.density}% Density</span>
               </div>
-            </div>
+
+              <div className="signal-controls mt-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">{junction.name}</h3>
+                  <div className={`signal-light ${junction.signal}`} />
+                </div>
+                
+                <div className="density-bar">
+                  <div
+                    className="density-bar-fill"
+                    style={{
+                      width: `${junction.density}%`,
+                      backgroundColor: junction.density > 70 ? '#ff4444' : 
+                                    junction.density > 40 ? '#ffbb33' : '#00C851'
+                    }}
+                  />
+                </div>
+
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Wait Time: {junction.waitTime}s</span>
+                  <span>Vehicles: {Math.floor(junction.density * 0.8)}</span>
+                </div>
+              </div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Density Chart */}
-        <div className="h-64">
+        <div className="flex gap-4 mb-8">
+          <button
+            className="control-button"
+            onClick={() => setSimulationActive(!simulationActive)}
+          >
+            {simulationActive ? <MdTimer /> : <MdAutorenew />}
+            {simulationActive ? 'Stop Automation' : 'Start Automation'}
+          </button>
+          
+          <button
+            className="control-button"
+            onClick={() => setCctvActive(!cctvActive)}
+          >
+            <FaVideo />
+            {cctvActive ? 'Pause CCTV' : 'Resume CCTV'}
+          </button>
+        </div>
+
+        <div className="chart-container">
           <Line data={chartData} options={chartOptions} />
         </div>
-      </div>
-
-      {/* Benefits Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {benefits.map((benefit, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-lg shadow-lg p-6 text-center"
-          >
-            <div className="flex justify-center mb-4">{benefit.icon}</div>
-            <h3 className="text-xl font-semibold mb-2">{benefit.title}</h3>
-            <p className="text-gray-600">{benefit.description}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Model Development Button */}
-      <div className="mt-8 text-center">
-        <button
-          onClick={() => setShowModelDev(true)}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
-        >
-          <FaCode className="mr-2" />
-          View Model Development Process
-        </button>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };
 
