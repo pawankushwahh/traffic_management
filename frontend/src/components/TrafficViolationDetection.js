@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaHelmetUn, FaMotorcycle, FaCarCrash, FaExclamationTriangle, FaFileInvoiceDollar } from 'react-icons/fa';
+import { 
+  FaMotorcycle, 
+  FaCarCrash, 
+  FaExclamationTriangle, 
+  FaFileInvoiceDollar,
+  FaHardHat
+} from 'react-icons/fa';
 import { MdSpeed, MdWrongLocation, MdNotificationsActive } from 'react-icons/md';
 import { BiCctv } from 'react-icons/bi';
 import { GiCctvCamera } from 'react-icons/gi';
@@ -29,7 +35,7 @@ const TrafficViolationDetection = () => {
     NO_HELMET: {
       type: 'No Helmet',
       fine: 1000,
-      icon: <FaHelmetUn className="text-red-500" />,
+      icon: <FaHardHat className="text-red-500" />,
       description: 'Riding two-wheeler without helmet'
     },
     WRONG_SIDE: {
