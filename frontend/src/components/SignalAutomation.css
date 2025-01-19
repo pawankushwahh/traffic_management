@@ -64,13 +64,17 @@
 }
 
 .cctv-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  justify-content: space-between;
   gap: 20px;
   margin-bottom: 30px;
+  overflow-x: auto;
+  padding: 20px 0;
 }
 
 .cctv-feed {
+  flex: 1;
+  min-width: 280px;
   background: #1a1a1a;
   border-radius: 12px;
   padding: 15px;
@@ -79,9 +83,60 @@
   overflow: hidden;
 }
 
-.cctv-feed video {
+.traffic-animation {
   width: 100%;
+  height: 150px;
+  background: #2a2a2a;
+  position: relative;
+  overflow: hidden;
   border-radius: 8px;
+}
+
+.road {
+  position: absolute;
+  width: 100%;
+  height: 60px;
+  background: #333;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.road-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #fff, #fff 20px, transparent 20px, transparent 40px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.vehicle {
+  position: absolute;
+  width: 40px;
+  height: 20px;
+  background: #fff;
+  border-radius: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: left 0.5s linear;
+}
+
+@keyframes moveVehicle {
+  from {
+    left: -40px;
+  }
+  to {
+    left: calc(100% + 40px);
+  }
+}
+
+.vehicle.car1 { background-color: #ff4444; }
+.vehicle.car2 { background-color: #33b5e5; }
+.vehicle.car3 { background-color: #00C851; }
+.vehicle.car4 { background-color: #ffbb33; }
+
+.vehicle.active {
+  animation: moveVehicle var(--speed) linear infinite;
 }
 
 .analytics-overlay {

@@ -83,11 +83,12 @@ const SignalAutomation = () => {
 
   // Calculate signal timing based on traffic density
   const calculateGreenTime = (density) => {
-    // Base time of 30 seconds
-    const baseTime = 30;
-    // Additional time based on density (up to 30 more seconds)
-    const additionalTime = Math.floor((density / 100) * 30);
-    return baseTime + additionalTime;
+    // Minimum time of 10 seconds, maximum of 60 seconds
+    const minTime = 10;
+    const maxTime = 60;
+    // Calculate time based on density
+    const calculatedTime = minTime + Math.floor((density / 100) * (maxTime - minTime));
+    return calculatedTime;
   };
 
   // Calculate red time for other signals based on current green signal
@@ -110,7 +111,7 @@ const SignalAutomation = () => {
     const variation = Math.random() * 30 - 15; // ±15
     
     // Ensure density stays within bounds
-    return Math.max(0, Math.min(100, baseDensity + variation));
+    return Math.max(10, Math.min(100, baseDensity + variation)); // Minimum 10% density
   };
 
   // Switch signals based on timer
@@ -218,21 +219,26 @@ const SignalAutomation = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 }}
             >
-              <video
-                ref={el => videoRefs.current[index] = el}
-                autoPlay
-                muted
-                loop
-                className="w-full h-48 object-cover"
-                style={{ opacity: cctvActive ? 1 : 0.5 }}
-              >
-                <source src={`/traffic-feed-${index + 1}.mp4`} type="video/mp4" />
-              </video>
+              <div className="traffic-animation">
+                <div className="road">
+                  <div className="road-line" />
+                </div>
+                {[...Array(Math.ceil(junction.density / 20))].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`vehicle car${(i % 4) + 1} ${junction.signal === 'green' ? 'active' : ''}`}
+                    style={{
+                      '--speed': `${junction.signal === 'green' ? '2s' : '4s'}`,
+                      animationDelay: `${i * 0.5}s`
+                    }}
+                  />
+                ))}
+              </div>
               
               <div className="analytics-overlay">
                 <BiCctv />
                 <span className="live-indicator">LIVE</span>
-                <span>{junction.density}% Density</span>
+                <span>{Math.round(junction.density)}% Density</span>
               </div>
 
               <div className="signal-controls mt-4">
