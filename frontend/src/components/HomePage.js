@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaCarSide, FaVideo, FaCamera, FaExclamationTriangle, FaUserShield, FaChartLine, FaTrafficLight, FaStopwatch } from 'react-icons/fa';
+import { FaCarSide, FaVideo, FaCamera, FaExclamationTriangle, FaUserShield, FaChartLine, FaTrafficLight, FaStopwatch, FaShieldAlt } from 'react-icons/fa';
 
 const FeatureCard = ({ title, description, icon, link }) => (
   <Link to={link} className="block">
@@ -66,6 +66,12 @@ const HomePage = () => {
       description: "Intelligent traffic signal timing system using vehicle detection and real-time adaptation",
       icon: <FaStopwatch />,
       link: "/adaptive-timer"
+    },
+    {
+      title: "Rule Violation Detection",
+      description: "AI-powered traffic rule violation detection with automatic e-challan",
+      icon: <FaShieldAlt />,
+      link: "/violations"
     }
   ];
 

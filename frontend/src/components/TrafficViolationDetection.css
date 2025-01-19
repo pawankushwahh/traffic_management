@@ -53,23 +53,32 @@
   gap: 2rem;
 }
 
-.camera-view {
-  background-color: #1a1a1a;
+.detection-system {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.cctv-monitor {
+  background: #1a1a1a;
   border-radius: 1rem;
+  padding: 1rem;
+  position: relative;
+}
+
+.camera-view {
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 0.5rem;
   aspect-ratio: 16/9;
   position: relative;
   overflow: hidden;
-  margin-bottom: 1.5rem;
 }
 
 .camera-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   padding: 1rem;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 30%);
 }
 
 .camera-info {
@@ -78,6 +87,12 @@
   gap: 0.5rem;
   color: white;
   font-size: 0.875rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
 }
 
 .recording-indicator {
@@ -85,43 +100,77 @@
   animation: pulse 1s infinite;
 }
 
-.detection-overlay {
+.detection-area {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
 }
 
 .detection-box {
-  border: 2px solid #3b82f6;
-  width: 150px;
-  height: 150px;
-  position: relative;
-  animation: scan 3s infinite;
+  width: 60px;
+  height: 60px;
+  border: 2px solid;
+  position: absolute;
+  border-radius: 4px;
 }
 
-.detection-box::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: #3b82f6;
-  animation: scanline 3s infinite;
+.detection-box.green {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.detection-box.red {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+  animation: pulse 1s infinite;
+}
+
+.license-plate-scanner {
+  background: #2d3748;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  color: white;
+}
+
+.license-plate-scanner h3 {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: #a0aec0;
+}
+
+.plate-display {
+  background: #1a202c;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 1.5rem;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.violations-panel {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
 }
 
 .violations-list {
-  margin-top: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .violation-card {
-  background-color: white;
+  background: white;
   border-radius: 0.5rem;
   padding: 1rem;
   margin-bottom: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-left: 4px solid #3b82f6;
 }
 
@@ -129,7 +178,6 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 0.5rem;
 }
 
 .violation-info {
@@ -141,57 +189,37 @@
 }
 
 .fine {
-  display: block;
-  color: #dc2626;
+  color: #ef4444;
   font-weight: 600;
 }
 
 .confidence {
   font-size: 0.75rem;
-  color: #4b5563;
-}
-
-.violation-details {
-  font-size: 0.875rem;
-  color: #4b5563;
-  border-top: 1px solid #e5e7eb;
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-}
-
-.challan-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  color: #059669;
+  color: #6b7280;
 }
 
 .statistics-panel {
-  background-color: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  padding: 1rem;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  margin-bottom: 1.5rem;
 }
 
 .stat-card {
-  background-color: #f8fafc;
-  border-radius: 0.5rem;
+  background: white;
   padding: 1rem;
+  border-radius: 0.5rem;
   text-align: center;
 }
 
 .stat-card h3 {
   font-size: 0.875rem;
-  color: #4b5563;
+  color: #6b7280;
   margin-bottom: 0.5rem;
 }
 
@@ -201,47 +229,17 @@
   color: #1e40af;
 }
 
-.violation-types-list {
-  margin-top: 1.5rem;
-}
-
-.violation-type-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.count {
-  font-weight: 600;
-  color: #4b5563;
-}
-
 @keyframes pulse {
   0% { opacity: 1; }
   50% { opacity: 0.5; }
   100% { opacity: 1; }
 }
 
-@keyframes scan {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-@keyframes scanline {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(150px); }
-  100% { transform: translateY(0); }
-}
-
 @media (max-width: 1024px) {
   .content-grid {
     grid-template-columns: 1fr;
   }
-  
-  .statistics-panel {
-    order: -1;
+  .detection-system {
+    grid-template-columns: 1fr;
   }
 }

@@ -146,6 +146,64 @@ const TrafficViolationDetection = () => {
     console.log(`SMS sent to vehicle owner ${violation.licensePlate}: E-challan generated for ${violationInfo.type}`);
   };
 
+  const [detectionBoxes, setDetectionBoxes] = useState([
+    { id: 1, status: 'green', position: { x: 0, y: 0 } },
+    { id: 2, status: 'green', position: { x: 100, y: 0 } },
+    { id: 3, status: 'green', position: { x: 200, y: 0 } },
+    { id: 4, status: 'red', position: { x: 0, y: 100 } },
+    { id: 5, status: 'green', position: { x: 100, y: 100 } },
+    { id: 6, status: 'green', position: { x: 200, y: 100 } },
+    { id: 7, status: 'green', position: { x: 0, y: 200 } },
+    { id: 8, status: 'red', position: { x: 100, y: 200 } }
+  ]);
+
+  const [scannedPlate, setScannedPlate] = useState(null);
+  const [processingViolation, setProcessingViolation] = useState(false);
+
+  // Update detection boxes positions randomly
+  useEffect(() => {
+    if (isDetecting) {
+      const interval = setInterval(() => {
+        setDetectionBoxes(prevBoxes => {
+          return prevBoxes.map(box => ({
+            ...box,
+            status: Math.random() > 0.8 ? 'red' : 'green',
+            position: {
+              x: Math.floor(Math.random() * 300),
+              y: Math.floor(Math.random() * 300)
+            }
+          }));
+        });
+      }, 2000);
+
+      return () => clearInterval(interval);
+    }
+  }, [isDetecting]);
+
+  // Process red box detections
+  useEffect(() => {
+    if (isDetecting) {
+      const redBoxes = detectionBoxes.filter(box => box.status === 'red');
+      if (redBoxes.length > 0 && !processingViolation) {
+        setProcessingViolation(true);
+        detectLicensePlate().then(plate => {
+          setScannedPlate(plate);
+          const violation = {
+            type: Object.keys(violationTypes)[Math.floor(Math.random() * Object.keys(violationTypes).length)],
+            licensePlate: plate,
+            timestamp: new Date().toISOString(),
+            location: cameras[selectedCamera - 1].location,
+            confidence: 0.95
+          };
+          processViolation(violation).then(() => {
+            setProcessingViolation(false);
+            setTimeout(() => setScannedPlate(null), 3000);
+          });
+        });
+      }
+    }
+  }, [detectionBoxes, isDetecting]);
+
   useEffect(() => {
     let detectionInterval;
     
@@ -196,8 +254,8 @@ const TrafficViolationDetection = () => {
         </div>
       </div>
 
-      <div className="content-grid">
-        <div className="violation-feed">
+      <div className="detection-system">
+        <div className="cctv-monitor">
           <div className="camera-view">
             <div className="camera-overlay">
               <div className="camera-info">
@@ -206,13 +264,39 @@ const TrafficViolationDetection = () => {
                 {isDetecting && <span className="recording-indicator">●</span>}
               </div>
               {isDetecting && (
-                <div className="detection-overlay">
-                  <div className="detection-box" />
+                <div className="detection-area">
+                  {detectionBoxes.map(box => (
+                    <motion.div
+                      key={box.id}
+                      className={`detection-box ${box.status}`}
+                      animate={{
+                        x: box.position.x,
+                        y: box.position.y,
+                        scale: box.status === 'red' ? [1, 1.1, 1] : 1
+                      }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  ))}
                 </div>
               )}
             </div>
           </div>
 
+          {scannedPlate && (
+            <motion.div 
+              className="license-plate-scanner"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h3>License Plate Detection</h3>
+              <div className="plate-display">
+                {scannedPlate}
+              </div>
+            </motion.div>
+          )}
+        </div>
+
+        <div className="violations-panel">
           <div className="violations-list">
             <h2 className="text-xl font-semibold mb-4">Recent Violations</h2>
             {violations.map((violation, index) => (
@@ -246,34 +330,19 @@ const TrafficViolationDetection = () => {
               </motion.div>
             ))}
           </div>
-        </div>
 
-        <div className="statistics-panel">
-          <h2 className="text-xl font-semibold mb-4">Detection Statistics</h2>
-          
-          <div className="stats-grid">
-            <div className="stat-card">
-              <h3>Total Violations</h3>
-              <span className="stat-value">{stats.totalViolations}</span>
-            </div>
-            
-            <div className="stat-card">
-              <h3>Total Fines</h3>
-              <span className="stat-value">₹{stats.totalFines}</span>
-            </div>
-          </div>
-
-          <div className="violation-types-list">
-            <h3 className="text-lg font-semibold mb-3">Violation Types</h3>
-            {Object.entries(violationTypes).map(([key, info]) => (
-              <div key={key} className="violation-type-item">
-                <div className="flex items-center gap-2">
-                  {info.icon}
-                  <span>{info.type}</span>
-                </div>
-                <span className="count">{stats.violationTypes[key] || 0}</span>
+          <div className="statistics-panel">
+            <h2 className="text-xl font-semibold mb-4">Detection Statistics</h2>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h3>Total Violations</h3>
+                <span className="stat-value">{stats.totalViolations}</span>
               </div>
-            ))}
+              <div className="stat-card">
+                <h3>Total Fines</h3>
+                <span className="stat-value">₹{stats.totalFines}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
